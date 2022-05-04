@@ -1,4 +1,4 @@
-#Appunti corso
+#Appunti corso  
 ##Prima parte
 
     pipenv shell
