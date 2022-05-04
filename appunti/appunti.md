@@ -1,6 +1,6 @@
-#Appunti corso  
+# Appunti corso  
 
-##Prima parte
+## Prima parte
 
     pipenv shell
 per inizializzare l'environment
@@ -46,9 +46,9 @@ per cambiare password a user
 cerca django modeladmin per controllare tutte le cose customizzabili per le app nella dashboard admin
 
 -----------------
-##API
+## API
 
-####REST:
+#### REST:
 Resources (come product, cart, reviews), dovremmo riuscire ad arrivarci tramite http://nomesito.com/products/1/reviews/1
 Representations: html/xml/json
 Methods: metodi http Get ottenere/Post creare/Put modificare/Patch modificare singola cosa/Delete eliminare

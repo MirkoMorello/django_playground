@@ -9,11 +9,17 @@ from .serializers import ProductSerializer, CollectionSerializer
 # Create your views here.
 # queste permettono di effettuare endpoint RESTful API
 
-@api_view() # di rest_frameork, più performante, installato tramite pipenv e abbiamo aggiunto alle installed apps
+@api_view(['GET', 'POST']) # di rest_frameork, più performante, installato tramite pipenv e abbiamo aggiunto alle installed apps
 def product_list(request):
-    queryset = Product.objects.select_related('collection').all() # mi permette anche di prendere le relative collezioni
-    serializer = ProductSerializer(queryset, many = True, context = {'request' : request}) # essendo una queryset, avverto che deve iterare su più oggetti per castarli a dizionario
-    return Response(serializer.data) # anche questo è di rest_framework
+    if request.method == 'GET':
+        queryset = Product.objects.select_related('collection').all() # mi permette anche di prendere le relative collezioni
+        serializer = ProductSerializer(queryset, many = True, context = {'request' : request}) # essendo una queryset, avverto che deve iterare su più oggetti per castarli a dizionario
+        return Response(serializer.data) # anche questo è di rest_framework
+    elif request.method == 'POST':
+        serializer = ProductSerializer(data=request.data) # se data è specificato, il serializer effettuerà deserealizzazione in modo tale che da un dizionario ottengo un oggetto
+        serializer.is_valid(raise_exception = True) # con raise exception = True non c'è bisogno di fare un if else in cui restituire status 400
+        serializer.validated_data
+
 
 """
 @api_view()
