@@ -34,7 +34,7 @@ def product_detail(request, id):
         return Response(status=status.HTTP_404_NOT_FOUND)
 """
 
-@api_view(['GET', 'PUT'])
+@api_view(['GET', 'PUT', 'DELETE'])
 def product_detail(request, id):
     product = get_object_or_404(Product, pk=id) # ottengo l'oggetto se c'è, se non c'è ottengo risposta 404 da passare
     if request.method == 'GET':
@@ -44,7 +44,12 @@ def product_detail(request, id):
         serializer = ProductSerializer(product, data = request.data)
         serializer.is_valid(raise_exception = True)
         serializer.save()
-        return Response(serializer.data) 
+        return Response(serializer.data)
+    elif request.method == 'DELETE':
+        if product.orderitems.count() > 0:
+            return Response({'error': "product can't be deleted because there is an associated order item"}, status = status.HTTP_405_METHOD_NOT_ALLOWED) # in caso l'oggetto sia referenziato in un order, non lo elimino e ritorno 405
+        product.delete()
+        return Response(status.HTTP_204_NO_CONTENT)
 
 @api_view()
 def collection_detail(request, pk):
