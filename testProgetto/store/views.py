@@ -1,3 +1,4 @@
+from logging import raiseExceptions
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from rest_framework.decorators import api_view
@@ -18,7 +19,8 @@ def product_list(request):
     elif request.method == 'POST':
         serializer = ProductSerializer(data=request.data) # se data è specificato, il serializer effettuerà deserealizzazione in modo tale che da un dizionario ottengo un oggetto
         serializer.is_valid(raise_exception = True) # con raise exception = True non c'è bisogno di fare un if else in cui restituire status 400
-        serializer.validated_data
+        serializer.save() # viene salvato in DB
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 """
@@ -32,11 +34,17 @@ def product_detail(request, id):
         return Response(status=status.HTTP_404_NOT_FOUND)
 """
 
-@api_view()
+@api_view(['GET', 'PUT'])
 def product_detail(request, id):
     product = get_object_or_404(Product, pk=id) # ottengo l'oggetto se c'è, se non c'è ottengo risposta 404 da passare
-    serializer = ProductSerializer(product)
-    return Response(serializer.data) # serializer.data l'effettivo dizionario, successivamente django creerà un oggetto json da questo dizionario
+    if request.method == 'GET':
+        serializer = ProductSerializer(product)
+        return Response(serializer.data) # serializer.data l'effettivo dizionario, successivamente django creerà un oggetto json da questo dizionario
+    elif request.method == 'PUT':
+        serializer = ProductSerializer(product, data = request.data)
+        serializer.is_valid(raise_exception = True)
+        serializer.save()
+        return Response(serializer.data) 
 
 @api_view()
 def collection_detail(request, pk):
