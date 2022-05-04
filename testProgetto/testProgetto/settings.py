@@ -136,3 +136,10 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# aggiunto da noi per evitare che restful restituisca int come stringa, cambiando il default di rest framework, l'applicazione importata
+
+REST_FRAMEWORK = {
+    'COERCE_DECIMAL_TO_STRING' : False
+}

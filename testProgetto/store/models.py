@@ -29,7 +29,8 @@ class Product(models.Model):
     title = models.CharField(max_length=255) #varchar 255
     slug = models.SlugField()
     description = models.TextField(null=True, blank=True) # blank permette di non inserire niente nella creazione di un nuovo oggetto
-    unit_price = models.DecimalField(max_digits=6, decimal_places=2, validators = [MinLengthValidator(1)]) # validatore da il numero minimo durante la creazione di un nuovo oggetto
+    unit_price = models.DecimalField(max_digits=6,
+                                     decimal_places=2,validators = [MinLengthValidator(1)]) # validatore da il numero minimo durante la creazione di un nuovo oggetto
     inventory = models.IntegerField()
     last_update = models.DateTimeField
     inventory = models.IntegerField()

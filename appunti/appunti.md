@@ -56,4 +56,6 @@ Methods: metodi http Get ottenere/Post creare/Put modificare/Patch modificare si
 abbiamo aggiunto tramite pipenv restframework e l'abbiamo aggiunto alle installed apps, che permette di vedere per bene le nostre api quando visito attraverso browser
 in Views metto le funzioni che rispondono alle chiamate http, in urls le abilito
 JsonRenderer prende un oggetto di tipo dizionario e lo trasforma in json
-Serializer converte un modello in un dizionario
+Serializer converte un modello in un dizionario  
+
+Il nostro modello API è ben diverso dal nostro Data Model, ed è giusto che continui ad essere così, l'API model deve essere una interfaccia dell'implementazione Data Model che deve rimanere nascosta, in modo tale che rimanga stabile
