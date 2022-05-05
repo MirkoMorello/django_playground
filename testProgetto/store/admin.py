@@ -90,6 +90,7 @@ class CustomerAdmin(admin.ModelAdmin):
     list_display = ['first_name', 'last_name', 'membership', 'orders_count']
     list_editable = ['membership']
     list_per_page = 10
+    list_select_related = ['user']
     search_fields = ['first_name__istartswith', 'ilast_name__starts_with'] # è per dire che vuoi che inizi con quello che stai cercando, non case sensitive
 
     def orders_count(self, customer):

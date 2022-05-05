@@ -3,6 +3,8 @@ from itertools import product
 from unittest.util import _MAX_LENGTH
 from django.db import models
 from django.core.validators import MinLengthValidator, MinValueValidator
+from django.conf import settings
+from django.contrib import admin
 from uuid import uuid4
 
 # Create your models here.
@@ -60,21 +62,30 @@ class Customer(models.Model):
         (MEMBERSHIP_SILVER, 'Silver'),
         (MEMBERSHIP_GOLD, 'Gold'),
     ]
-    first_name = models.CharField(max_length = 255)
-    last_name = models.CharField(max_length = 255)
-    email = models.EmailField(unique = True)
+    # first_name = models.CharField(max_length = 255) # non servono più perchè sono nell'user model
+    # last_name = models.CharField(max_length = 255)
+    # email = models.EmailField(unique = True)
     phone = models.CharField(max_length = 255)
     birth_date = models.DateField(null = True)
     membership = models.CharField(max_length=1, choices = MEMBERSHP_CHOICES, default = MEMBERSHIP_BRONZE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete = models.CASCADE)
 
     def __str__(self) -> str: #override del metodo tostring, così da poter visualizzarle nell'admin panel
         return self.title #super().__str__()
     
+    @admin.display(ordering = 'user__first_name') # per abilitare il sort per questi campi che sono esterni
+    def first_name(self):
+        return self.user.first_name
+    
+    @admin.display(ordering = 'user__last_name')
+    def last_name(self):
+        return self.user.last_name
+
     class Meta:
-        ordering = ['first_name', 'last_name']
+        ordering = ['user__first_name', 'user__last_name']
     
     def __str__(self) -> str: #override del metodo tostring, così da poter visualizzarle nell'admin panel
-        return f'{self.first_name} {self.last_name}' #super().__str__()
+        return f'{self.user.first_name} {self.user.last_name}' #super().__str__()
     
 
 
