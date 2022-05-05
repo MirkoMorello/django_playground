@@ -7,17 +7,18 @@ from django.http import HttpResponse
 from django.db.models.aggregates import Count
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.mixins import ListModelMixin, CreateModelMixin
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
-
 from rest_framework import status
 from .models import OrderItem, Product, Collection, Review
 from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer
 from .filters import ProductFilter
+from .pagination import DefaultPagination
 
 
 # Create your views here.
@@ -32,6 +33,7 @@ class ProductViewSet(ModelViewSet): # abbiamo una singola classe che implementa 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter] # permette di utilizzare filtri
     #filterset_fields = ['collection_id', 'unit_price'] # specifico che tipo per che tipo di risorse posso filtrare, questo è il classico filtro
     filterset_class = ProductFilter # se cerchi django_filters ci sono tutte le varie customizzazioni, questo è un filtro customizzato che si trova in filters.py
+    pagination_class = DefaultPagination # PageNumberPagination # per la paginazione, anche se potri metterla globale globale nelle settings
     search_fields = ['title', 'description'] # questo è il searchfilter, server per cercare in campi di testo, potrei inserire anche campi esterni come collection__description
     ordering_fields = ['unit_price', 'last_update'] # questo è OrderingFilter, serve per sortare
     

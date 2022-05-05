@@ -6,5 +6,5 @@ class ProductFilter(FilterSet):
         model = Product
         fields = {
             'collection_id': ['exact'],
-            'unit_price' : ['gt', 'st'] # permetto di specificare less than e greater than
+            'unit_price' : ['gt', 'lt'] # permetto di specificare less than e greater than
         }

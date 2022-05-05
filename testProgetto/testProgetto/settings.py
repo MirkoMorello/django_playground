@@ -139,8 +139,10 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# aggiunto da noi per evitare che restful restituisca int come stringa, cambiando il default di rest framework, l'applicazione importata
+
 
 REST_FRAMEWORK = {
-    'COERCE_DECIMAL_TO_STRING' : False
+    'COERCE_DECIMAL_TO_STRING' : False, # aggiunto da noi per evitare che restful restituisca int come stringa, cambiando il default di rest framework, l'applicazione importata
+    # 'DEFAULT_PAGINATION_CLASS' : 'rest_framework.pagination.PageNumberPagination', # metto la paginazione globale, avrei potuto mettere anche LimitOffsetPagination
+    # 'PAGE_SIZE': 10  # aggiunto da noi per paginare 10 elementi alla volta
 }
