@@ -9,14 +9,14 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.mixins import ListModelMixin, CreateModelMixin
+from rest_framework.mixins import ListModelMixin, CreateModelMixin, DestroyModelMixin, RetrieveModelMixin
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework import status
-from .models import OrderItem, Product, Collection, Review
-from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer
+from .models import OrderItem, Product, Collection, Review, Cart, CartItem
+from .serializers import CartItemSerializer, ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer
 from .filters import ProductFilter
 from .pagination import DefaultPagination
 
@@ -30,6 +30,7 @@ from .pagination import DefaultPagination
 class ProductViewSet(ModelViewSet): # abbiamo una singola classe che implementa tutte le views per il prodotto, grazie a ModelViewSet
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter] # permette di utilizzare filtri
     #filterset_fields = ['collection_id', 'unit_price'] # specifico che tipo per che tipo di risorse posso filtrare, questo è il classico filtro
     filterset_class = ProductFilter # se cerchi django_filters ci sono tutte le varie customizzazioni, questo è un filtro customizzato che si trova in filters.py
@@ -45,7 +46,6 @@ class ProductViewSet(ModelViewSet): # abbiamo una singola classe che implementa 
             return Response({'error': "product can't be deleted because there is an associated order item"}, status = status.HTTP_405_METHOD_NOT_ALLOWED) # in caso l'oggetto sia referenziato in un order, non lo elimino e ritorno 405
         return super().destroy(request, *args, **kwargs)
         
-
 
 
 class CollectionViewSet(ModelViewSet): # volendo esiste anche ReadOnlyModelViewSet che permette di non avere put/delete/patch
@@ -69,6 +69,21 @@ class ReviewViewSet(ModelViewSet):
         return Review.objects.filter(product_id = self.kwargs['product_pk']) # prendo le review solo dell'attuale product, dall'url
 
 
+
+class CartViewSet(CreateModelMixin,
+                  GenericViewSet,
+                  RetrieveModelMixin,
+                  DestroyModelMixin): # non dobbiamo esporre get su all carts, quindi selezioniamo i mixin che ci servono
+    queryset = Cart.objects.prefetch_related('items__product').all()
+    serializer_class = CartSerializer
+
+
+
+class CartItemViewSet(ModelViewSet):
+    serializer_class = CartItemSerializer
+
+    def get_queryset(self): # dato che non vogliamo tutti i cart item
+        return CartItem.objects.filter(cart_id = self.kwargs['cart_pk']).select_related('product')
 
 
 

@@ -3,6 +3,7 @@ from itertools import product
 from unittest.util import _MAX_LENGTH
 from django.db import models
 from django.core.validators import MinLengthValidator
+from uuid import uuid4
 
 # Create your models here.
 
@@ -32,7 +33,8 @@ class Product(models.Model):
     slug = models.SlugField()
     description = models.TextField(null=True, blank=True) # blank permette di non inserire niente nella creazione di un nuovo oggetto
     unit_price = models.DecimalField(max_digits=6,
-                                     decimal_places=2,validators = [MinLengthValidator(1)]) # validatore da il numero minimo durante la creazione di un nuovo oggetto
+                                     decimal_places=2,
+                                     validators = [MinLengthValidator(1)]) # validatore da il numero minimo durante la creazione di un nuovo oggetto
     inventory = models.IntegerField()
     last_update = models.DateTimeField
     inventory = models.IntegerField()
@@ -109,14 +111,18 @@ class OrderItem(models.Model):
 
 
 class Cart(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid4) # permette di cambiare la pk da un numero integer sequenziale ad una stringa alfanumerica, questo perchè perlomeno un hacker non può accedere a random tramite api a carrelli di altre persone, non è una funzione perchè se no hardcodava un singolo uuid per ogni cart
     created_at = models.DateTimeField(auto_now_add = True)
 
 
 
 class CartItem(models.Model):
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveBigIntegerField()
+
+    class Meta:
+        unique_together = [['cart', 'product']] # così ho una singola istanza di un prodotto in un carrello
 
 
 
