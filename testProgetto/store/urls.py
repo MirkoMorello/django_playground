@@ -5,7 +5,7 @@ from . import views
 from pprint import pprint # per printare carino
 
 router = routers.DefaultRouter()
-router.register('products', views.ProductViewSet) # stiamo dicendo che il nostro products endpoint dovrebbe essere gestito da productviewset
+router.register('products', views.ProductViewSet, basename  = 'products') # stiamo dicendo che il nostro products endpoint dovrebbe essere gestito da productviewset. Ho specificato esplicitamente basename perchè ho modificato get_queryset e non capisce più nulla essendo che ha anche le review
 router.register('collections', views.CollectionViewSet)
 # pprint(router.urls) se vuoi vedere le regexp e come sono gestiti i paths appena creati
 

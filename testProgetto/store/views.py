@@ -1,4 +1,5 @@
 from ast import Delete
+from gc import collect
 from logging import raiseExceptions
 from math import prod
 from django.shortcuts import get_object_or_404
@@ -21,9 +22,16 @@ from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializ
 
 
 class ProductViewSet(ModelViewSet): # abbiamo una singola classe che implementa tutte le views per il prodotto, grazie a ModelViewSet
-    queryset = Product.objects.all() # mi permette anche di prendere le relative collezioni
+    # queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    
+
+    def get_queryset(self): # override così posso restituire solo gli oggetti filtrati dalle info specificate nell'url
+        queryset = Product.objects.all()
+        collection_id = self.request.query_params.get('collection_id') # prendo le info dall'url
+        if collection_id is not None:
+            queryset = queryset.filter(collection_id = collection_id)
+        return queryset
+
     def get_serializer_context(self): #override
             return {'request' : self.request} # essendo una queryset, avverto che deve iterare su più oggetti per castarli a dizionario
 
@@ -32,6 +40,9 @@ class ProductViewSet(ModelViewSet): # abbiamo una singola classe che implementa 
             return Response({'error': "product can't be deleted because there is an associated order item"}, status = status.HTTP_405_METHOD_NOT_ALLOWED) # in caso l'oggetto sia referenziato in un order, non lo elimino e ritorno 405
         return super().destroy(request, *args, **kwargs)
         
+
+
+
 class CollectionViewSet(ModelViewSet): # volendo esiste anche ReadOnlyModelViewSet che permette di non avere put/delete/patch
     queryset = Collection.objects.annotate(products_count = Count('products')).all() # conto i prodotti che lo hanno referenziato
     serializer_class = CollectionSerializer
