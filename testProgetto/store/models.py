@@ -2,7 +2,7 @@ from dis import disco
 from itertools import product
 from unittest.util import _MAX_LENGTH
 from django.db import models
-from django.core.validators import MinLengthValidator
+from django.core.validators import MinLengthValidator, MinValueValidator
 from uuid import uuid4
 
 # Create your models here.
@@ -119,7 +119,7 @@ class Cart(models.Model):
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveBigIntegerField()
+    quantity = models.PositiveBigIntegerField(validators = [MinValueValidator(1)]) # valore minimo accettato = 1
 
     class Meta:
         unique_together = [['cart', 'product']] # così ho una singola istanza di un prodotto in un carrello

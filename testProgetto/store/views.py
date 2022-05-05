@@ -16,7 +16,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework import status
 from .models import OrderItem, Product, Collection, Review, Cart, CartItem
-from .serializers import CartItemSerializer, ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer
+from .serializers import AddCartItemSerializer, CartItemSerializer, ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer, UpdateCartItemSerializer
 from .filters import ProductFilter
 from .pagination import DefaultPagination
 
@@ -80,10 +80,30 @@ class CartViewSet(CreateModelMixin,
 
 
 class CartItemViewSet(ModelViewSet):
-    serializer_class = CartItemSerializer
+    http_method_names = ['get', 'post', 'patch', 'delete'] # così sono in grado di lasciare fuori put
+
+    def get_serializer_class(self): # permetto di avere due serializer differenti, così il post rimane pulito
+        if self.request.method == 'POST':
+            return AddCartItemSerializer
+        elif self.request.method == 'PATCH':
+            return UpdateCartItemSerializer
+        return CartItemSerializer
+    
+    def get_serializer_context(self):
+        return {'cart_id' : self.kwargs['cart_pk']} # nei serializer non ho possibilità di prelevare il cart id che è nell'url, qui ce l'ho, quindi lo passo tramite context, guaerda addcartitemserializer
 
     def get_queryset(self): # dato che non vogliamo tutti i cart item
         return CartItem.objects.filter(cart_id = self.kwargs['cart_pk']).select_related('product')
+
+
+
+
+
+
+
+
+
+
 
 
 
