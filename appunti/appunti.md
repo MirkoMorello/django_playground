@@ -70,3 +70,5 @@ Per creare una api serve:
 
 #### drf nested routers, su github
 usiamo questo pacchetto per poter fare risorse innestate
+#### django-filter  
+usiamo questo pacchetto per poter filtrare automaticamente le nostre api da url senza doverne implementare la logica

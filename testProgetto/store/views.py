@@ -5,6 +5,7 @@ from math import prod
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from django.db.models.aggregates import Count
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.mixins import ListModelMixin, CreateModelMixin
 from rest_framework.decorators import api_view
@@ -14,6 +15,8 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework import status
 from .models import OrderItem, Product, Collection, Review
 from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer
+from .filters import ProductFilter
+
 
 # Create your views here.
 # queste permettono di effettuare endpoint RESTful API
@@ -22,16 +25,11 @@ from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializ
 
 
 class ProductViewSet(ModelViewSet): # abbiamo una singola classe che implementa tutte le views per il prodotto, grazie a ModelViewSet
-    # queryset = Product.objects.all()
+    queryset = Product.objects.all()
     serializer_class = ProductSerializer
-
-    def get_queryset(self): # override così posso restituire solo gli oggetti filtrati dalle info specificate nell'url
-        queryset = Product.objects.all()
-        collection_id = self.request.query_params.get('collection_id') # prendo le info dall'url
-        if collection_id is not None:
-            queryset = queryset.filter(collection_id = collection_id)
-        return queryset
-
+    filter_backends = [DjangoFilterBackend] # permette di utilizzare filtri
+    #filterset_fields = ['collection_id', 'unit_price'] # specifico che tipo per che tipo di risorse posso filtrare, questo è il classico filtro
+    filterset_class = ProductFilter # se cerchi django_filters ci sono tutte le varie customizzazioni, questo è un filtro customizzato che si trova in filters.py
     def get_serializer_context(self): #override
             return {'request' : self.request} # essendo una queryset, avverto che deve iterare su più oggetti per castarli a dizionario
 

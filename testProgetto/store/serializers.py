@@ -3,6 +3,7 @@ from venv import create
 from rest_framework import serializers
 from .models import Product, Collection, Review
 
+
 # in django-rest-framework.org/api-guide/fields/ trovo tutte le informazioni per costruire un serializer
 # Serializer converte un modello in un dizionario, però non tutte i vari campi devono essere convertiti perchè alcuni sono privati, quindi li specifichiamo per ogni modello
 

@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',    # usato per le sessioni
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_filters', # django-filter package
     'rest_framework', # aggiunto da noi per API, pacchetto aggiunto tramite pipenv
     'playground',
     'debug_toolbar',
