@@ -2,8 +2,11 @@ from logging import raiseExceptions
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from django.db.models.aggregates import Count
+from rest_framework.generics import ListCreateAPIView
+from rest_framework.mixins import ListModelMixin, CreateModelMixin
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework import status
 from .models import Product, Collection
 from .serializers import ProductSerializer, CollectionSerializer
@@ -11,17 +14,57 @@ from .serializers import ProductSerializer, CollectionSerializer
 # Create your views here.
 # queste permettono di effettuare endpoint RESTful API
 
-@api_view(['GET', 'POST']) # di rest_frameork, più performante, installato tramite pipenv e abbiamo aggiunto alle installed apps
-def product_list(request):
-    if request.method == 'GET':
-        queryset = Product.objects.select_related('collection').all() # mi permette anche di prendere le relative collezioni
-        serializer = ProductSerializer(queryset, many = True, context = {'request' : request}) # essendo una queryset, avverto che deve iterare su più oggetti per castarli a dizionario
-        return Response(serializer.data) # anche questo è di rest_framework
-    elif request.method == 'POST':
-        serializer = ProductSerializer(data=request.data) # se data è specificato, il serializer effettuerà deserealizzazione in modo tale che da un dizionario ottengo un oggetto
-        serializer.is_valid(raise_exception = True) # con raise exception = True non c'è bisogno di fare un if else in cui restituire status 400
-        serializer.save() # viene salvato in DB
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+# quelle fatte fino ad ora sono function-based views, esistono anche class-based views, rendono il codice più pulito
+class ProductList(ListCreateAPIView): # utilizzando ListCreateAPIView al posto di APIView sto utilizzando una implementazione generica che mi permette di non specificare get/put/delete
+    queryset = Product.objects.select_related('collection').all() # mi permette anche di prendere le relative collezioni
+    serializer_class = ProductSerializer
+    
+    def get_serializer_context(self): #override
+        return {'request' : self.request} # essendo una queryset, avverto che deve iterare su più oggetti per castarli a dizionario
+
+
+class ProductDetail(APIView):
+
+    def get(self, request, id):
+        product = get_object_or_404(Product, pk=id) # ottengo l'oggetto se c'è, se non c'è ottengo risposta 404 da passare
+        serializer = ProductSerializer(product)
+        return Response(serializer.data) # serializer.data l'effettivo dizionario, successivamente django creerà un oggetto json da questo dizionario
+
+    def put(self, request, id):
+        product = get_object_or_404(Product, pk=id)
+        serializer = ProductSerializer(product, data = request.data)
+        serializer.is_valid(raise_exception = True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def delete(self, request, id):
+        product = get_object_or_404(Product, pk=id)
+        if product.orderitems.count() > 0:
+            return Response({'error': "product can't be deleted because there is an associated order item"}, status = status.HTTP_405_METHOD_NOT_ALLOWED) # in caso l'oggetto sia referenziato in un order, non lo elimino e ritorno 405
+        product.delete()
+        return Response(status.HTTP_204_NO_CONTENT)
+
+        
+class CollectionList(ListCreateAPIView):
+    queryset = Collection.objects.annotate(products_count = Count('products')).all() # conto i prodotti che lo hanno referenziato
+    serializer_class = CollectionSerializer
+
+
+
+
+
+
+# @api_view(['GET', 'POST']) # di rest_frameork, più performante, installato tramite pipenv e abbiamo aggiunto alle installed apps
+# def product_list(request):
+#     if request.method == 'GET':
+#         queryset = Product.objects.select_related('collection').all() # mi permette anche di prendere le relative collezioni
+#         serializer = ProductSerializer(queryset, many = True, context = {'request' : request}) # essendo una queryset, avverto che deve iterare su più oggetti per castarli a dizionario
+#         return Response(serializer.data) # anche questo è di rest_framework
+#     elif request.method == 'POST':
+#         serializer = ProductSerializer(data=request.data) # se data è specificato, il serializer effettuerà deserealizzazione in modo tale che da un dizionario ottengo un oggetto
+#         serializer.is_valid(raise_exception = True) # con raise exception = True non c'è bisogno di fare un if else in cui restituire status 400
+#         serializer.save() # viene salvato in DB
+#         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 """
@@ -35,22 +78,22 @@ def product_detail(request, id):
         return Response(status=status.HTTP_404_NOT_FOUND)
 """
 
-@api_view(['GET', 'PUT', 'DELETE'])
-def product_detail(request, id):
-    product = get_object_or_404(Product, pk=id) # ottengo l'oggetto se c'è, se non c'è ottengo risposta 404 da passare
-    if request.method == 'GET':
-        serializer = ProductSerializer(product)
-        return Response(serializer.data) # serializer.data l'effettivo dizionario, successivamente django creerà un oggetto json da questo dizionario
-    elif request.method == 'PUT':
-        serializer = ProductSerializer(product, data = request.data)
-        serializer.is_valid(raise_exception = True)
-        serializer.save()
-        return Response(serializer.data)
-    elif request.method == 'DELETE':
-        if product.orderitems.count() > 0:
-            return Response({'error': "product can't be deleted because there is an associated order item"}, status = status.HTTP_405_METHOD_NOT_ALLOWED) # in caso l'oggetto sia referenziato in un order, non lo elimino e ritorno 405
-        product.delete()
-        return Response(status.HTTP_204_NO_CONTENT)
+# @api_view(['GET', 'PUT', 'DELETE'])
+# def product_detail(request, id):
+#     product = get_object_or_404(Product, pk=id) # ottengo l'oggetto se c'è, se non c'è ottengo risposta 404 da passare
+#     if request.method == 'GET':
+#         serializer = ProductSerializer(product)
+#         return Response(serializer.data) # serializer.data l'effettivo dizionario, successivamente django creerà un oggetto json da questo dizionario
+#     elif request.method == 'PUT':
+#         serializer = ProductSerializer(product, data = request.data)
+#         serializer.is_valid(raise_exception = True)
+#         serializer.save()
+#         return Response(serializer.data)
+#     elif request.method == 'DELETE':
+#         if product.orderitems.count() > 0:
+#             return Response({'error': "product can't be deleted because there is an associated order item"}, status = status.HTTP_405_METHOD_NOT_ALLOWED) # in caso l'oggetto sia referenziato in un order, non lo elimino e ritorno 405
+#         product.delete()
+#         return Response(status.HTTP_204_NO_CONTENT)
 
 
 
