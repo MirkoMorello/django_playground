@@ -42,9 +42,9 @@ INSTALLED_APPS = [
     'playground',
     'debug_toolbar',
     'store',
-    'store_custom',
     'tags',
-    'likes'
+    'likes',
+    'core'
 ]
 
 MIDDLEWARE = [
@@ -146,3 +146,5 @@ REST_FRAMEWORK = {
     # 'DEFAULT_PAGINATION_CLASS' : 'rest_framework.pagination.PageNumberPagination', # metto la paginazione globale, avrei potuto mettere anche LimitOffsetPagination
     # 'PAGE_SIZE': 10  # aggiunto da noi per paginare 10 elementi alla volta
 }
+
+AUTH_USER_MODEL = 'core.User' # impostazione custom per specificare l'auth model
