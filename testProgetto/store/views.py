@@ -8,6 +8,7 @@ from rest_framework.mixins import ListModelMixin, CreateModelMixin
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 from rest_framework import status
 from .models import Product, Collection
 from .serializers import ProductSerializer, CollectionSerializer
@@ -16,17 +17,14 @@ from .serializers import ProductSerializer, CollectionSerializer
 # queste permettono di effettuare endpoint RESTful API
 
 # quelle fatte fino ad ora sono function-based views, esistono anche class-based views, rendono il codice più pulito
-class ProductList(ListCreateAPIView): # utilizzando ListCreateAPIView al posto di APIView sto utilizzando una implementazione generica che mi permette di non specificare get/put/delete
-    queryset = Product.objects.select_related('collection').all() # mi permette anche di prendere le relative collezioni
+
+
+class ProductViewSet(ModelViewSet): # abbiamo una singola classe che implementa tutte le views per il prodotto, grazie a ModelViewSet
+    queryset = Product.objects.all() # mi permette anche di prendere le relative collezioni
     serializer_class = ProductSerializer
     
     def get_serializer_context(self): #override
-        return {'request' : self.request} # essendo una queryset, avverto che deve iterare su più oggetti per castarli a dizionario
-
-
-class ProductDetail(RetrieveUpdateDestroyAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+            return {'request' : self.request} # essendo una queryset, avverto che deve iterare su più oggetti per castarli a dizionario
 
     def delete(self, request, pk): # diventa un override di  RetrieveUpdateDestroyAPIView.delete perchè abbiamo della logica che non possiamo utilizzare lì ma ci serve custom
         product = get_object_or_404(Product, pk=pk)
@@ -34,23 +32,18 @@ class ProductDetail(RetrieveUpdateDestroyAPIView):
             return Response({'error': "product can't be deleted because there is an associated order item"}, status = status.HTTP_405_METHOD_NOT_ALLOWED) # in caso l'oggetto sia referenziato in un order, non lo elimino e ritorno 405
         product.delete()
         return Response(status.HTTP_204_NO_CONTENT)
-
         
-class CollectionList(ListCreateAPIView):
+class CollectionViewSet(ModelViewSet): # volendo esiste anche ReadOnlyModelViewSet che permette di non avere put/delete/patch
     queryset = Collection.objects.annotate(products_count = Count('products')).all() # conto i prodotti che lo hanno referenziato
     serializer_class = CollectionSerializer
 
-
-class CollectionDetail(RetrieveUpdateDestroyAPIView):
-    queryset = Collection.objects.annotate(products_count = Count('products'))
-    serializer_class = CollectionSerializer
-    
     def delete(self, request, pk): # override
         collection = get_object_or_404(Collection, pk=pk)
         if collection.product.count()>0:
             return Response({'error': "collection can't be deleted because there are products referencing it"}, status.HTTP_405_METHOD_NOT_ALLOWED)
         collection.delete()
-        return Response(status.HTTP_204_NO_CONTENT)
+        return Response(status.HTTP_204_NO_CONTENT)    
+    
 
 
 
