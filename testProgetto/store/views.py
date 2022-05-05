@@ -1,5 +1,6 @@
 from ast import Delete
 from logging import raiseExceptions
+from math import prod
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from django.db.models.aggregates import Count
@@ -10,8 +11,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import status
-from .models import OrderItem, Product, Collection
-from .serializers import ProductSerializer, CollectionSerializer
+from .models import OrderItem, Product, Collection, Review
+from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer
 
 # Create your views here.
 # queste permettono di effettuare endpoint RESTful API
@@ -41,6 +42,15 @@ class CollectionViewSet(ModelViewSet): # volendo esiste anche ReadOnlyModelViewS
         return super().destroy(request, *args, **kwargs)
     
 
+
+class ReviewViewSet(ModelViewSet):
+    serializer_class = ReviewSerializer
+
+    def get_serializer_context(self):
+        return {'product_id': self.kwargs['product_pk']} # in self.kwargs['product_pk'] c'è l'id del prodotto dell'url, è ciò che passo al serializer, così non devo specificarlo in post ma è automaticamente preso dall'url
+        
+    def get_queryset(self): #override perchè prendendo .all() ad ogni prodotto vedevo le review di tutti i prodotti
+        return Review.objects.filter(product_id = self.kwargs['product_pk']) # prendo le review solo dell'attuale product, dall'url
 
 
 

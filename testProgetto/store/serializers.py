@@ -1,6 +1,7 @@
 from decimal import Decimal
+from venv import create
 from rest_framework import serializers
-from .models import Product, Collection
+from .models import Product, Collection, Review
 
 # in django-rest-framework.org/api-guide/fields/ trovo tutte le informazioni per costruire un serializer
 # Serializer converte un modello in un dizionario, però non tutte i vari campi devono essere convertiti perchè alcuni sono privati, quindi li specifichiamo per ogni modello
@@ -31,15 +32,17 @@ class ProductSerializer(serializers.ModelSerializer):
     #     queryset = Collection.objects.all(),
     #     view_name = 'collection-detail'
     # )
-
-
-
-
-
-
-
     def calculate_tax (self, product: Product):
         return product.unit_price * Decimal(1.1)
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = ['id', 'date', 'name', 'description'] # abbiamo rimosso product perchè viene preso dall'url, sovrascrivendo context in views viene passato forzatamente product_id
+    
+    def create(self, validated_data): # override della creazione del dizionario, così posso andare a pescare product_id che ho passato forzatamente dall'url nella view
+        product_id = self.context['product_id'] # prendo dal context overridato in views
+        return Review.objects.create(product_id = product_id, **validated_data) # creo l'oggetto con i validated_data che sono quelli dentro fields, e aggiungo product_id preso dal context che in views.py ho preso dall'url
 
 
     # def create(self, validated_data): # override, in caso io voglia customizzazioni nella creazione di un oggetto dopo POST, non è necessario

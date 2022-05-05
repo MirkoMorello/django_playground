@@ -60,4 +60,13 @@ Serializer converte un modello in un dizionario
 
 Il nostro modello API è ben diverso dal nostro Data Model, ed è giusto che continui ad essere così, l'API model deve essere una interfaccia dell'implementazione Data Model che deve rimanere nascosta, in modo tale che rimanga stabile  
 
-Mixin, serve per creare classi di views generiche
+Mixin, serve per creare classi di views generiche  
+
+Ricapitolando:  
+Per creare una api serve:  
+- creare un serializer
+- una view
+- registrare la route
+
+#### drf nested routers, su github
+usiamo questo pacchetto per poter fare risorse innestate

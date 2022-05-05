@@ -1,17 +1,19 @@
 from django.urls import path
 from rest_framework.routers import SimpleRouter, DefaultRouter # default router mette di default anche il supporto a http://127.0.0.1:8000/store/, inoltre, se uso http://127.0.0.1:8000/store/products.json ottengo il json
+from rest_framework_nested import routers # libreria esterna, installata con drf nested routers, permette di fare rotte innestate
 from . import views
 from pprint import pprint # per printare carino
 
-router = DefaultRouter()
+router = routers.DefaultRouter()
 router.register('products', views.ProductViewSet) # stiamo dicendo che il nostro products endpoint dovrebbe essere gestito da productviewset
 router.register('collections', views.CollectionViewSet)
 # pprint(router.urls) se vuoi vedere le regexp e come sono gestiti i paths appena creati
 
+products_router = routers.NestedDefaultRouter(router, 'products', lookup='product')
+products_router.register('reviews', views.ReviewViewSet, basename ='product-reviews') # aggiungo child a products, che sarebbero le reviews, sto creando innestamento
 
 # URLConf
-
-urlpatterns = router.urls
+urlpatterns = router.urls + products_router.urls
 
 # urlpatterns = [
 #     # path('products/', views.ProductList.as_view()), # asview permette di convertire la classe in una classica function-based view
