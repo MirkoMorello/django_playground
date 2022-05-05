@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import status
-from .models import Product, Collection
+from .models import OrderItem, Product, Collection
 from .serializers import ProductSerializer, CollectionSerializer
 
 # Create your views here.
@@ -26,23 +26,19 @@ class ProductViewSet(ModelViewSet): # abbiamo una singola classe che implementa 
     def get_serializer_context(self): #override
             return {'request' : self.request} # essendo una queryset, avverto che deve iterare su più oggetti per castarli a dizionario
 
-    def delete(self, request, pk): # diventa un override di  RetrieveUpdateDestroyAPIView.delete perchè abbiamo della logica che non possiamo utilizzare lì ma ci serve custom
-        product = get_object_or_404(Product, pk=pk)
-        if product.orderitems.count() > 0:
+    def destroy(self, request, *args, **kwargs):
+        if OrderItem.objects.filter(product_id = kwargs['pk']).count() > 0: # abbiamo cambiato la logica di distruzione per non pingare ancora il db, lezione 2_26, ricontrolla
             return Response({'error': "product can't be deleted because there is an associated order item"}, status = status.HTTP_405_METHOD_NOT_ALLOWED) # in caso l'oggetto sia referenziato in un order, non lo elimino e ritorno 405
-        product.delete()
-        return Response(status.HTTP_204_NO_CONTENT)
+        return super().destroy(request, *args, **kwargs)
         
 class CollectionViewSet(ModelViewSet): # volendo esiste anche ReadOnlyModelViewSet che permette di non avere put/delete/patch
     queryset = Collection.objects.annotate(products_count = Count('products')).all() # conto i prodotti che lo hanno referenziato
     serializer_class = CollectionSerializer
 
-    def delete(self, request, pk): # override
-        collection = get_object_or_404(Collection, pk=pk)
-        if collection.product.count()>0:
+    def destroy(self, request, *args, **kwargs):
+        if Product.objects.filter(collection_id = kwargs['pk']).count() > 0: # abbiamo cambiato la logica di distruzione per non pingare ancora il db, lezione 2_26, ricontrolla
             return Response({'error': "collection can't be deleted because there are products referencing it"}, status.HTTP_405_METHOD_NOT_ALLOWED)
-        collection.delete()
-        return Response(status.HTTP_204_NO_CONTENT)    
+        return super().destroy(request, *args, **kwargs)
     
 
 
