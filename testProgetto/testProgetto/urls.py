@@ -25,5 +25,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('playground/', include('playground.urls')), # reidirezione al file urls di playground
     path('store/', include('store.urls')), # reidirezione al file urls di store
+    path('auth/', include('djoser.urls')), # per auth
+    path('auth/', include('djoser.urls.jwt')),
     path('__debug__/', include(debug_toolbar.urls)),
 ]

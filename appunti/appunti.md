@@ -72,3 +72,11 @@ Per creare una api serve:
 usiamo questo pacchetto per poter fare risorse innestate
 #### django-filter  
 usiamo questo pacchetto per poter filtrare automaticamente le nostre api da url senza doverne implementare la logica
+
+## Autenticazione
+#### djoser
+Usiamo questo pacchetto per effettuare autenticazione tramite tokens
+
+### auth engines:
+- token-bassed authentication di django, i token sono storati in db e quindi per ogni richiesta si pinga il db
+- JSON Web Token Authentication basata su pacchetti esterni, workano senza db (djangorestframework_simplejwt)

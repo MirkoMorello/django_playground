@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_filters', # django-filter package
     'rest_framework', # aggiunto da noi per API, pacchetto aggiunto tramite pipenv
+    'djoser', # aggiunto per autenticazione
     'playground',
     'debug_toolbar',
     'store',
@@ -145,6 +146,13 @@ REST_FRAMEWORK = {
     'COERCE_DECIMAL_TO_STRING' : False, # aggiunto da noi per evitare che restful restituisca int come stringa, cambiando il default di rest framework, l'applicazione importata
     # 'DEFAULT_PAGINATION_CLASS' : 'rest_framework.pagination.PageNumberPagination', # metto la paginazione globale, avrei potuto mettere anche LimitOffsetPagination
     # 'PAGE_SIZE': 10  # aggiunto da noi per paginare 10 elementi alla volta
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+SIMPLE_JWT = {
+   'AUTH_HEADER_TYPES': ('JWT',),
 }
 
 AUTH_USER_MODEL = 'core.User' # impostazione custom per specificare l'auth model

@@ -103,6 +103,10 @@ class Order(models.Model):
     payment_status = models.CharField(max_length=1, choices=PAYMENT_CHOICES, default=PAYMENT_PENDING)
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
 
+    class Meta:
+        permissions = [
+            ('cancel_order', 'Can cancel order') # custom permission che posso vedere nelle permissions nella dashboard admin ed assegnarla a gruppi/users
+        ]
 
 
 class Address(models.Model): #relazione uno a molti
