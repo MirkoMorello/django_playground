@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from django.db.models.aggregates import Count
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import SearchFilter
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.mixins import ListModelMixin, CreateModelMixin
 from rest_framework.decorators import api_view
@@ -29,10 +29,11 @@ from .filters import ProductFilter
 class ProductViewSet(ModelViewSet): # abbiamo una singola classe che implementa tutte le views per il prodotto, grazie a ModelViewSet
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    filter_backends = [DjangoFilterBackend, SearchFilter] # permette di utilizzare filtri
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter] # permette di utilizzare filtri
     #filterset_fields = ['collection_id', 'unit_price'] # specifico che tipo per che tipo di risorse posso filtrare, questo è il classico filtro
     filterset_class = ProductFilter # se cerchi django_filters ci sono tutte le varie customizzazioni, questo è un filtro customizzato che si trova in filters.py
     search_fields = ['title', 'description'] # questo è il searchfilter, server per cercare in campi di testo, potrei inserire anche campi esterni come collection__description
+    ordering_fields = ['unit_price', 'last_update'] # questo è OrderingFilter, serve per sortare
     
     def get_serializer_context(self): #override
             return {'request' : self.request} # essendo una queryset, avverto che deve iterare su più oggetti per castarli a dizionario
