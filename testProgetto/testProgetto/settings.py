@@ -156,3 +156,10 @@ SIMPLE_JWT = {
 }
 
 AUTH_USER_MODEL = 'core.User' # impostazione custom per specificare l'auth model
+
+
+DJOSER = {
+    'SERIALIZERS' : {
+        'user_create' : 'core.serializers.UserCreateSerializer'
+    }
+}
