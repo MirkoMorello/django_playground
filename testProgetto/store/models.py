@@ -35,7 +35,7 @@ class Product(models.Model):
     last_update = models.DateTimeField
     inventory = models.IntegerField()
     last_update = models.DateTimeField(auto_now = True)
-    collection = models.ForeignKey(Collection, on_delete = models.PROTECT)
+    collection = models.ForeignKey(Collection, on_delete = models.PROTECT, related_name='products') # essendo ambivalente qui sto dicendo anche che il campo di collection non sarà product ma products
     promotions = models.ManyToManyField(Promotion, blank = True)
 
     def __str__(self) -> str: #override del metodo tostring, così da poter visualizzarle nell'admin panel

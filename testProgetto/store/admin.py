@@ -42,7 +42,7 @@ class CollectionAdmin(admin.ModelAdmin):
     
     def get_queryset(self, request):
         return super().get_queryset(request).annotate( # override della classe oggetto originaria (ModelAdmin ha questo metodo) per poter aggiungere products_count a variabile dell'oggetto
-            products_count = Count('product')
+            products_count = Count('products')
         )
 
 
